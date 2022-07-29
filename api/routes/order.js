@@ -11,8 +11,14 @@ router.get('/', (req, res, next) => {
 });
 
 router.post('/', (req, res, next) => {
+    //extracting data from body and using it
+    const order  = {
+        productID : req.body.productID,
+        quantity: req.body.quantity
+    }
     res.status(201).json({
-        message: 'Order created'
+        message: 'Order created',
+        order: order
     });
 
 });
