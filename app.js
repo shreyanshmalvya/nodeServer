@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
-const morgan = require('morgan') //not added
-const bodyParser = require('body-parser') //not added
+const morgan = require('morgan') 
+const bodyParser = require('body-parser') 
 
 //import product routes
 const productRoutes = require('./api/routes/product')
@@ -47,6 +47,5 @@ app.use((error, req, res, next) =>{
     });
 
 });
-
 
 module.exports = app;
