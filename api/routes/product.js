@@ -26,8 +26,6 @@ router.get('/', (req, res, next) => {
                         }
                     }
                 })
-                    
-                
             }
             console.log(docs);
             res.status(200).json(result);
