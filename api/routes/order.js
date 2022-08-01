@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const Order = require('../model/order');
-const Product = require('../model/product')
-// for normal orders
+const Product = require('../model/product');
 
+// for normal orders
 router.get('/', (req, res, next) => {
     Order.find().select('product quantity _id')
         .exec()
@@ -33,7 +33,7 @@ router.get('/', (req, res, next) => {
 
 router.post('/', (req, res, next) => {
     //first we check if the incomming product exists or not
-    Product.findById(req.body.productId)
+    Product.findById(req.body.product)
         .then(product => {
             if (!product) {
                 return res.status(404).json({
@@ -44,7 +44,7 @@ router.post('/', (req, res, next) => {
             const order = new Order({
                 _id: new mongoose.Types.ObjectId(),
                 quantity: req.body.quantity,
-                product: req.body.productId
+                product : req.body.product
             });
             //use return to use then to create a promise later
             return order.save()
@@ -52,7 +52,11 @@ router.post('/', (req, res, next) => {
         .then(result => {
             res.status(201).json({
                 message: 'Order Created Successfully',
-                orderDetails: result,
+                orderDetails: {
+                    id : result._id,
+                    productID : result.product,
+                    quantity : result.quantity
+                },
                 request: {
                     type: 'GET',
                     url: 'localhost:5000/Orders/' + result._id

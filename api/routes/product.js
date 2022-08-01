@@ -77,7 +77,7 @@ router.get('/:productId', (req, res, next) => {
         .then(doc => {
             console.log(doc);
             //check if not returning a null message for incorrect id
-            if (doc > 0) {
+            if (doc) {
                 res.status(200).json({
                     message: 'indivisual product fetched',
                     details: doc,
@@ -140,7 +140,7 @@ router.delete('/:productId', (req, res, next) => {
                 details: result,
                 request : {
                     type : 'GET',
-                    url: 'localhost:5000/Products/' + id
+                    url: 'localhost:5000/Products/' 
                 }
             })
         }).catch(err => {
