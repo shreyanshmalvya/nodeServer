@@ -31,6 +31,7 @@ router.get('/', (req, res, next) => {
         });
 });
 
+// for post request , we check multiple criteria
 router.post('/', (req, res, next) => {
     //first we check if the incomming product exists or not
     Product.findById(req.body.product)
