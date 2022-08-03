@@ -4,24 +4,56 @@ const { default: mongoose } = require('mongoose');
 const router = express.Router();
 const Product = require('../model/product')
 
+//we use multer to process images
+const multer = require('multer');
+
+//filefilter to avoid all file types
+const fileFilter = (req, file, cb) => {
+    if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
+        cb(null, true);
+    } else {
+        cb(null, false);
+    }
+};
+// setup a server side storage option
+const storage = multer.diskStorage({
+    //allocate the file on disk using diskStorage function
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/');
+    },
+    //rename the file
+    filename: function (req, file, cb) {
+        cb(null, file.originalname)
+    }
+});
+//upload callback to configure multer
+const upload = multer({
+    storage, 
+    limits: {
+        fileSize : 1024*1024*5  //5MB
+    },
+    fileFilter: fileFilter
+});
+
 
 // now we take a look at schema to find out routes at this endpoint
 // we use router in express in order to set up routes
 
 router.get('/', (req, res, next) => {
-    Product.find().select('name price _id')
+    Product.find().select('name price _id productImage')
         .exec()
         .then(docs => {
             const result = {
-                count : docs.length,
-                products : docs.map(doc =>{
+                count: docs.length,
+                products: docs.map(doc => {
                     //we need a return for mapping output
-                    return{
+                    return {
                         name: doc.name,
                         price: doc.price,
-                        _id : doc.id,
-                        request : {
-                            type : 'GET',
+                        _id: doc.id,
+                        image : doc.productImage,
+                        request: {
+                            type: 'GET',
                             url: 'localhost:5000/Products/' + doc.id
                         }
                     }
@@ -37,13 +69,15 @@ router.get('/', (req, res, next) => {
 });
 
 
-router.post('/', (req, res, next) => {
+router.post('/', upload.single('productImage'), (req, res, next) => {
     //extracting data from body and using it
+    console.log(req.file);
     const product = new Product({
         //pass objectID as a function () to autogenerate the id
         _id: new mongoose.Types.ObjectId(),
         name: req.body.name,
-        price: req.body.price
+        price: req.body.price,
+        productImage: req.file.path
     });
 
     //after creation we save the data
@@ -52,11 +86,13 @@ router.post('/', (req, res, next) => {
         res.status(201).json({
             message: 'Product Created Successfully',
             product: {
-                name : result.name,
-                price : result.price,
-                _id : result.id,
-                request : {
-                    type : 'GET',
+                name: result.name,
+                price: result.price,
+                _id: result._id,
+                //TODO : check this endpoint
+                image : result.productImage,
+                request: {
+                    type: 'GET',
                     url: 'localhost:5000/Products/' + result.id
                 }
             }
@@ -83,10 +119,10 @@ router.get('/:productId', (req, res, next) => {
                     details: doc,
                     request: {
                         type: 'POST',
-                        url : 'localhost:5000/Products/',
-                        body : {
-                            name : 'name for product',
-                            price : 'price for product'
+                        url: 'localhost:5000/Products/',
+                        body: {
+                            name: 'name for product',
+                            price: 'price for product'
                         }
                     }
                 });
@@ -113,22 +149,22 @@ router.patch('/:productId', (req, res, next) => {
         updateOps[ops.propName] = ops.value;
     }
     Product.updateOne({ _id: id }, { $set: updateOps })
-    .exec()
-    .then( result=>{
-        res.status(200).json({
-            message: 'Product updated!',
-            product: result,
-            request : {
-                type : 'GET',
-                url: 'localhost:5000/Products/' + id
-            }
+        .exec()
+        .then(result => {
+            res.status(200).json({
+                message: 'Product updated!',
+                product: result,
+                request: {
+                    type: 'GET',
+                    url: 'localhost:5000/Products/' + id
+                }
+            });
+        }).catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            });
         });
-    }).catch( err =>{
-        console.log(err);
-        res.status(500).json({
-            error : err
-        });
-    });
 });
 
 router.delete('/:productId', (req, res, next) => {
@@ -138,9 +174,9 @@ router.delete('/:productId', (req, res, next) => {
             res.status(200).json({
                 message: 'Product Deleted',
                 details: result,
-                request : {
-                    type : 'GET',
-                    url: 'localhost:5000/Products/' 
+                request: {
+                    type: 'GET',
+                    url: 'localhost:5000/Products/'
                 }
             })
         }).catch(err => {
