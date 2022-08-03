@@ -1,3 +1,4 @@
+//built using express,mongoose, morgan, nodemon, multer, bodyparser 
 const express = require('express');
 const app = express();
 const morgan = require('morgan');
@@ -10,6 +11,9 @@ const orderRoutes = require('./api/routes/order')
 
 //auto logging of server data, we use dev in oder to specify that we only need this in dev version
 app.use(morgan('dev'));
+//make the uploads folder avilable statically
+app.use('/uploads', express.static('uploads'))
+//use body parser to parse incomming requests
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
