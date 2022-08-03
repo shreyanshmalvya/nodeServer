@@ -2,11 +2,13 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const Order = require('../model/order');
+const { populate } = require('../model/product');
 const Product = require('../model/product');
 
 // for normal orders
 router.get('/', (req, res, next) => {
     Order.find().select('product quantity _id')
+        .populate('product', 'name')
         .exec()
         .then(docs => {
             res.status(200).json({
@@ -77,6 +79,7 @@ router.post('/', (req, res, next) => {
 router.get('/:orderId', (req, res, next) => {
     const id = req.params.orderId;
     Order.findById(id).select('product quantity _id')
+        .populate('product')
         .exec()
         .then(result => {
             res.status(200).json({
