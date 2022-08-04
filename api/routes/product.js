@@ -19,11 +19,11 @@ const fileFilter = (req, file, cb) => {
 const storage = multer.diskStorage({
     //allocate the file on disk using diskStorage function
     destination: function (req, file, cb) {
-        cb(null, 'uploads/');
+        cb(null, './uploads/');
     },
     //rename the file
     filename: function (req, file, cb) {
-        cb(null, file.originalname)
+        cb(null, new Date().toISOString().replace(/:/g, '-')+ file.originalname)
     }
 });
 //upload callback to configure multer
